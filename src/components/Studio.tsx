@@ -42,14 +42,16 @@ async function materializeDesign(d: SavedDesign): Promise<Layer[]> {
       const canvas = document.createElement('canvas')
       canvas.width = CANVAS_SIZE
       canvas.height = CANVAS_SIZE
-      const ctx = canvas.getContext('2d')!
-      const img = new Image()
-      img.onload = () => {
-        ctx.clearRect(0, 0, CANVAS_SIZE, CANVAS_SIZE)
+      try {
+        const img = await loadImage(sl.png)
+        const ctx = canvas.getContext('2d')!
         ctx.imageSmoothingEnabled = true
-        ctx.drawImage(img, sl.x, sl.y, CANVAS_SIZE, CANVAS_SIZE)
+        // PNG is a snapshot of the paint bitmap, not document space — draw
+        // at 0,0 so a stored layer offset is not applied twice.
+        ctx.drawImage(img, 0, 0, CANVAS_SIZE, CANVAS_SIZE)
+      } catch {
+        // Empty paint layer rather than aborting the whole restore.
       }
-      img.src = sl.png
       out.push({
         kind: 'paint',
         id,
@@ -354,8 +356,8 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
             })}
             {designs.length === 0 && (
               <p className="hint">
-                Nothing saved yet. Name the design and hit Save, or just keep
-                drawing - it autosaves.
+                Nothing saved yet. Give the design a name and hit Save —
+                after that, drawing autosaves.
               </p>
             )}
           </div>

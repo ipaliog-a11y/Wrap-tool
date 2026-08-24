@@ -2,6 +2,8 @@
 
 Design custom wraps for your Tesla's Paint Shop 3D visualization directly in the browser. Pick your vehicle, create your artwork on top of Tesla's official wrap template, validate it against Tesla's requirements in real time, and export a ready-to-transfer file — no Photoshop required.
 
+**Use it live:** [ipaliog-a11y.github.io/Wrap-tool](https://ipaliog-a11y.github.io/Wrap-tool/)
+
 Built as a companion to Tesla's official [`teslamotors/custom-wraps`](https://github.com/teslamotors/custom-wraps) template repository. Templates and vehicle images are fetched from that repo at runtime, so nothing is bundled and assets stay up to date.
 
 ---
@@ -27,20 +29,23 @@ A canvas-based editor laid over your vehicle's official `template.png`:
 - **Layers** — every imported image and every piece of text becomes its own layer. Select, reorder, hide and delete them from the sidebar. Brush, eraser and fill always draw on the single Paint layer.
 - **Move** — drag any layer with the Move tool. This is **non-destructive**: content dragged past the edge is hidden, not cropped, and comes back if you drag it in again.
 - **Resize** — drag the corner handles of a selected image or text layer, or use the Scale slider. Always uniform, so photos never distort.
-- **Brush** and **Eraser** with adjustable color and size
+- **Brush** and **Eraser** with adjustable color, size, gradients and patterns
 - **Flood fill** — fills the region you can actually see (sampled from the flattened composite), with a colour tolerance so antialiased edges don't leave a halo
 - **Text** placement with custom color and size, as its own movable, resizable layer
+- **Icons / stickers** — drop emoji as layers
 - **Add image** — import any photo; it is **cover-fitted** to the square without distortion, then free to move and resize
 - **Import template** — add the official template as a layer to trace over
 - **Dim non-wrap areas** toggle — shades the parts of the square the wrap doesn't cover, so your colours read at full strength exactly where they'll show on the car
 - **Grid guides** toggle for alignment
 - **Undo / Redo** — up to 30 steps covering every edit, capped at 64 MB of history
 - **Zoom / Pan** for detail work; panning is clamped so the artwork can't be lost off-screen
+- **Autosave** — named designs persist in the browser (localStorage)
 
 ### Validation & export
 - **Live validation** against Tesla's exact requirements: PNG format, square 512×512–1024×1024 px, ≤ 1 MB, and filename rules (letters/numbers/spaces/`-`/`_`, ≤ 30 chars, auto-sanitized)
 - **Always under 1 MB** — export automatically tries 1024² PNG → 512² PNG → 512² JPEG at decreasing quality until the file fits Tesla's 1 MB cap, and reports the final size/format (e.g. `512x512 PNG (640 KB)`)
 - **Export PNG** — one square PNG per wrap, which is what every vehicle template in the official repo expects
+- **3D preview** — spin the design on a simplified car before you export
 - **Check an existing PNG** — validate a wrap you made in another tool (Photoshop, Figma, etc.)
 
 ---
@@ -53,8 +58,8 @@ A canvas-based editor laid over your vehicle's official `template.png`:
 ### Install & run
 
 ```bash
-git clone https://github.tesla.com/ipaliogiannis/tesla-wrap-studio.git
-cd tesla-wrap-studio
+git clone https://github.com/ipaliog-a11y/Wrap-tool.git
+cd Wrap-tool
 npm install
 npm run dev
 ```
@@ -68,6 +73,8 @@ npm run typecheck  # tsc --noEmit
 npm run build      # typecheck, then output to dist/
 npm run preview    # preview the production build
 ```
+
+GitHub Pages deploys `dist/` from `main` via `.github/workflows/pages.yml`.
 
 ---
 
@@ -104,7 +111,8 @@ You can have up to 10 wraps from the mobile app and up to 10 from a USB drive.
 
 - **React 18** + **TypeScript** + **Vite**
 - **HTML5 Canvas** for the editor (no drawing library)
-- No backend — fully client-side, no runtime dependencies beyond React
+- **three.js** for the 3D preview
+- No backend — fully client-side; designs persist in localStorage
 
 ## Project structure
 
@@ -122,12 +130,16 @@ You can have up to 10 wraps from the mobile app and up to 10 from a USB drive.
     ├── lib/
     │   ├── layers.ts            # layer model, compositing, bounds, hit testing
     │   ├── useWrapDocument.ts   # layers + selection + undo history + export
+    │   ├── designStore.ts       # localStorage persistence
+    │   ├── paintStyle.ts        # solid / gradient / pattern brushes
     │   └── validate.ts          # validation + exportUnder1MB compression
     └── components/
         ├── VehiclePicker.tsx    # vehicle grid
         ├── Studio.tsx           # layout, document owner, template download
         ├── WrapCanvas.tsx       # the canvas editor
         ├── LayersPanel.tsx      # layer list: select, reorder, hide, delete
+        ├── IconPicker.tsx       # sticker drawer
+        ├── ThreeDPreview.tsx    # three.js wrap preview
         └── ExportPanel.tsx      # validation + export + existing-PNG checker
 ```
 
