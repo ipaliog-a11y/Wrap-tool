@@ -3,3 +3,89 @@
   padding: max(10px, env(safe-area-inset-top)) 20px 10px;
 }
 .header-actions { margin-left: auto; }
+
+.panel-toggle,
+.panel-backdrop,
+.studio-side-head {
+  display: none;
+}
+
+@media (max-width: 860px) {
+  main { overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
+  .studio {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+  }
+  .panel-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin: 8px 10px 0;
+    width: calc(100% - 20px);
+    justify-content: center;
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    font-size: 13px;
+    flex: none;
+  }
+  .panel-toggle:hover { border-color: var(--accent); }
+  .panel-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 70;
+    background: rgba(8, 9, 11, 0.55);
+    border: none;
+    padding: 0;
+    cursor: pointer;
+  }
+  .studio-side-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: -6px 0 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--border);
+  }
+  .studio-side-head h2 {
+    margin: 0;
+    font-size: 14px;
+    font-weight: 600;
+  }
+  .studio-side {
+    position: fixed;
+    z-index: 80;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: min(360px, 92vw);
+    border-right: 1px solid var(--border);
+    border-bottom: none;
+    transform: translateX(-110%);
+    transition: transform 0.2s ease-out;
+    padding-top: max(14px, env(safe-area-inset-top));
+    padding-bottom: max(18px, env(safe-area-inset-bottom));
+  }
+  .studio-side.open { transform: translateX(0); }
+  .studio-main {
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+  .editor { flex: 1; min-height: 0; }
+  .canvas-wrap { padding: 8px; }
+  .wrap-canvas {
+    width: min(100%, calc(100dvh - 280px));
+    max-width: none;
+  }
+  .toolbar { gap: 8px; padding: 8px 10px; }
+}

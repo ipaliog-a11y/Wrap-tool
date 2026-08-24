@@ -31,6 +31,7 @@ export type IconName =
   | 'smiley'
   | 'cube'
   | 'close'
+  | 'menu'
 
 const PATHS: Record<IconName, ReactNode> = {
   brush: (
@@ -198,6 +199,13 @@ const PATHS: Record<IconName, ReactNode> = {
     </>
   ),
   close: <path d="m4.2 4.2 7.6 7.6M11.8 4.2l-7.6 7.6" />,
+  menu: (
+    <>
+      <path d="M2.5 4h11" />
+      <path d="M2.5 8h11" />
+      <path d="M2.5 12h11" />
+    </>
+  ),
 }
 
 export function Icon({ name }: { name: IconName }) {
