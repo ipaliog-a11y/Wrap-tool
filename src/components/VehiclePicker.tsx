@@ -1,4 +1,4 @@
-﻿import { Vehicle, vehicleImage } from '../data/vehicles'
+import { Vehicle, vehicleImage } from '../data/vehicles'
 interface Props { vehicles: Vehicle[]; onSelect: (v: Vehicle) => void }
 export default function VehiclePicker({ vehicles, onSelect }: Props) {
   return (

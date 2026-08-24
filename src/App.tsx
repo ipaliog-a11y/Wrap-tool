@@ -1,4 +1,4 @@
-﻿import { useState } from 'react'
+import { useState } from 'react'
 import { VEHICLES, Vehicle } from './data/vehicles'
 import VehiclePicker from './components/VehiclePicker'
 import Studio from './components/Studio'
