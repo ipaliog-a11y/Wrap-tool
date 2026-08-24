@@ -4,3 +4,5 @@ dist
 *.log
 .vscode
 .idea
+public/icon-*.png
+public/apple-touch-icon.png

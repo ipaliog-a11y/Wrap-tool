@@ -4,6 +4,9 @@ Design custom wraps for your Tesla's Paint Shop 3D visualization directly in the
 
 **Use it live:** [ipaliog-a11y.github.io/Wrap-tool](https://ipaliog-a11y.github.io/Wrap-tool/)
 
+### Install on Android
+Open the live site in **Chrome**. After a visit, Chrome will offer **Install app** (or tap **⋮ → Add to Home screen / Install app**). It then launches full-screen like a native app — no Play Store needed. iPhone: Safari → Share → Add to Home Screen.
+
 Built as a companion to Tesla's official [`teslamotors/custom-wraps`](https://github.com/teslamotors/custom-wraps) template repository. Templates and vehicle images are fetched from that repo at runtime, so nothing is bundled and assets stay up to date.
 
 ---

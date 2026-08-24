@@ -1,0 +1,5 @@
+/* Installed / notch: keep the header below the Android status bar. */
+.app-header {
+  padding: max(10px, env(safe-area-inset-top)) 20px 10px;
+}
+.header-actions { margin-left: auto; }
