@@ -91,20 +91,29 @@ function writeIndex(list: DesignMeta[]): void {
   try {
     localStorage.setItem(INDEX_KEY, JSON.stringify(list))
   } catch (e) {
-    if (isQuotaError(e)) {
-      // Free up room for the design that actually triggered the save.
-      for (const m of [...list].sort((a, b) => a.savedAt - b.savedAt)) {
-        try {
-          localStorage.removeItem(designKey(m.vehicleId, m.name))
-        } catch {
-          // ignore
-        }
-      }
-      try {
-        localStorage.setItem(INDEX_KEY, JSON.stringify(list))
-      } catch {
-        // Storage is unusable; the caller has already warned the user.
-      }
+    if (!isQuotaError(e)) return
+    // Index JSON is tiny. If it still will not fit, storage is unusable —
+    // do not wipe design payloads just to write the index.
+    try {
+      localStorage.removeItem(INDEX_KEY)
+      localStorage.setItem(INDEX_KEY, JSON.stringify(list))
+    } catch {
+      // ignore
+    }
+  }
+}
+
+function dropOldestDesigns(keep: number, except?: { vehicleId: string; name: string }): void {
+  const list = readIndex()
+    .filter((m) => !(except && m.name === except.name && m.vehicleId === except.vehicleId))
+    .sort((a, b) => a.savedAt - b.savedAt)
+  while (list.length > keep) {
+    const m = list.shift()
+    if (!m) break
+    try {
+      localStorage.removeItem(designKey(m.vehicleId, m.name))
+    } catch {
+      // ignore
     }
   }
 }
@@ -269,7 +278,7 @@ export function saveDesign(
       const list = [
         meta,
         ...readIndex().filter((m) => !(m.name === name && m.vehicleId === vehicleId)),
-      ]
+      ].sort((a, b) => b.savedAt - a.savedAt)
       // Beyond the cap, drop the oldest designs (keys included), not just
       // their index rows - listDesigns scans the keys, so both must go.
       for (const m of list.slice(MAX_DESIGNS)) {
@@ -287,20 +296,8 @@ export function saveDesign(
         return false
       }
       onQuota?.()
-      // Retry with a smaller paint resolution to squeeze under the cap.
       maxPngPx = Math.max(128, Math.floor(maxPngPx / 2))
-      // Drop the oldest saved designs to make room.
-      const list = readIndex().sort((a, b) => b.savedAt - a.savedAt)
-      const overflow = list.length - (MAX_DESIGNS - 1)
-      for (let i = 0; i < overflow; i++) {
-        const m = list[i]
-        if (!m || m.name === name && m.vehicleId === vehicleId) continue
-        try {
-          localStorage.removeItem(designKey(m.vehicleId, m.name))
-        } catch {
-          // ignore
-        }
-      }
+      dropOldestDesigns(MAX_DESIGNS - 1, { vehicleId, name })
     }
   }
   return false
