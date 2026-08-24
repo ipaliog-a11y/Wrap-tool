@@ -1,6 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import './styles.css'
+import './pwa.css'
 
 // Set once the app has rendered. Before that, an error means the app never
 // started and replacing #root is the only way to say so. After that, wiping
