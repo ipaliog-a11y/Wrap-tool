@@ -4,8 +4,10 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "vite",
+    "icons": "node scripts/gen-icons.mjs",
+    "dev": "node scripts/gen-icons.mjs && vite",
     "typecheck": "tsc --noEmit",
+    "prebuild": "node scripts/gen-icons.mjs",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview"
   },
