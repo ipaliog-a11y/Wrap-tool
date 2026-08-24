@@ -336,6 +336,8 @@ export function useWrapDocument(canvasSize: number): WrapDocument {
       // History is kept: a caller that snapshotted before loading can undo
       // back to the previous design, exactly like any other mutation.
       paintCache.current.clear()
+      const maxId = ls.reduce((m, l) => Math.max(m, l.id), 0)
+      nextId.current = Math.max(nextId.current, maxId + 1)
       setLayers(ls)
       setSelectedId(sel)
       setContentTick((t) => t + 1)
