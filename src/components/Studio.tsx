@@ -122,6 +122,7 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
   const [designs, setDesigns] = useState<DesignMeta[]>([])
   const [storageError, setStorageError] = useState('')
   const [confirmNew, setConfirmNew] = useState(false)
+  const [panelOpen, setPanelOpen] = useState(false)
 
   const docRef = useRef(doc)
   docRef.current = doc
@@ -178,10 +179,6 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
     scheduleAutosave()
   }, [scheduleAutosave])
 
-  // Autosave whenever the layer stack changes (draw, add, move, delete...),
-  // debounced so a stroke triggers one write, not one per segment. Only once
-  // the design has an identity (a name), so a fresh blank canvas is not
-  // auto-saved under a placeholder.
   useEffect(() => {
     if (doc.contentTick === 0) return
     if (skipAutosaveRef.current) {
@@ -192,7 +189,6 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
     markDirty()
   }, [doc.layers, doc.contentTick, markDirty])
 
-  // On entering a vehicle: if the latest design for it is saved, restore it.
   useEffect(() => {
     let cancelled = false
     const list = listDesigns().filter((m) => m.vehicleId === vehicle.id)
@@ -215,7 +211,6 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
       cancelled = true
       if (timer.current) window.clearTimeout(timer.current)
     }
-    // Runs once per vehicle; doc is stable for the lifetime of this Studio.
   }, [vehicle])
 
   const onSaveAs = () => {
@@ -251,8 +246,6 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
     if (!d) return
     materializeDesign(d)
       .then((layers) => {
-        // Skip the autosave triggered by this load so we do not re-write the
-        // design we just read with a fresh timestamp.
         skipAutosaveRef.current = true
         doc.loadDesign(layers, null)
         setDesignName(d.name)
@@ -269,9 +262,35 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
   const vehicleLabel = (v: Vehicle) =>
     v.name + (v.variant ? ' — ' + v.variant : '')
 
+  useEffect(() => {
+    if (!panelOpen) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setPanelOpen(false)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [panelOpen])
+
   return (
-    <div className="studio">
-      <aside className="studio-side">
+    <div className={'studio' + (panelOpen ? ' panel-open' : '')}>
+      {panelOpen && (
+        <button
+          className="panel-backdrop"
+          aria-label="Close panel"
+          onClick={() => setPanelOpen(false)}
+        />
+      )}
+      <aside className={'studio-side' + (panelOpen ? ' open' : '')}>
+        <div className="studio-side-head">
+          <h2>Layers & export</h2>
+          <button
+            className="layer-btn"
+            title="Close panel"
+            onClick={() => setPanelOpen(false)}
+          >
+            <Icon name="close" />
+          </button>
+        </div>
         <section className="panel-section">
           <h3>My designs</h3>
           <div className="row">
@@ -340,7 +359,7 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
                     <span className="design-title">{m.name}</span>
                     <span className="design-meta">
                       {v ? vehicleLabel(v) : m.vehicleName || m.vehicleId}
-                      {' · '}
+                      {' \u00b7 '}
                       {formatTime(m.savedAt)}
                     </span>
                   </button>
@@ -383,6 +402,14 @@ export default function Studio({ vehicle }: { vehicle: Vehicle }) {
         <ExportPanel getCanvas={doc.exportCanvas} vehicleId={vehicle.id} />
       </aside>
       <div className="studio-main">
+        <button
+          className="panel-toggle"
+          title="Open layers, save and export"
+          onClick={() => setPanelOpen(true)}
+        >
+          <Icon name="menu" />
+          Layers & export
+        </button>
         <WrapCanvas vehicle={vehicle} doc={doc} />
       </div>
     </div>
